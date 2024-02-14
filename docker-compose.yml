@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certs:/etc/nginx/certs
+    depends_on:
+      - wordpress1
+      - wordpress2
+
+  wordpress1:
+    image: wordpress:latest
+    environment:
+      WORDPRESS_DB_HOST: mysql # Connect both WordPress instances to the same MySQL service
+      WORDPRESS_DB_USER: aiman
+      WORDPRESS_DB_PASSWORD: aimanahmad
+      WORDPRESS_DB_NAME: wordpress # Use the same database for both WordPress instances
+    volumes:
+      - wordpress_data:/var/www/html
+
+  wordpress2:
+    image: wordpress:latest
+    environment:
+      WORDPRESS_DB_HOST: mysql # Connect both WordPress instances to the same MySQL service
+      WORDPRESS_DB_USER: aiman
+      WORDPRESS_DB_PASSWORD: aimanahmad
+      WORDPRESS_DB_NAME: wordpress # Use the same database for both WordPress instances
+    volumes:
+      - wordpress_data:/var/www/html
+
+  mysql:
+    image: mariadb:latest
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: aimanahmad29
+      MYSQL_DATABASE: wordpress # Use the same database for both WordPress instances
+      MYSQL_USER: aiman
+      MYSQL_PASSWORD: aimanahmad
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      PMA_HOST: mysql # Connect PHPMyAdmin to the same MySQL service
+      PMA_PORT: 3306
+      PMA_ARBITRARY: false
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  wordpress_data:
